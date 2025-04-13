@@ -36,6 +36,8 @@ export interface Team {
   name: string;
   abbreviation: string;
   ownerName: string;
+  captainId?: string;
+  captainName?: string;
   logo?: string;
   primaryColor: string;
   secondaryColor: string;

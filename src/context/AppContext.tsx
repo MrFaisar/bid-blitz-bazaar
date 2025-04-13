@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { AppState, Player, Team, UserRole, ConnectionMode } from '../types';
 
@@ -33,6 +32,7 @@ type ActionType =
   | { type: 'SET_TEAMS'; payload: Team[] }
   | { type: 'ADD_TEAM'; payload: Team }
   | { type: 'UPDATE_TEAM'; payload: Team }
+  | { type: 'DELETE_TEAM'; payload: string }
   | { type: 'START_AUCTION'; payload: Player }
   | { type: 'PLACE_BID'; payload: { teamId: string; amount: number } }
   | { type: 'FINALIZE_BID'; payload: { sold: boolean; teamId?: string; amount?: number } }
@@ -76,6 +76,12 @@ const appReducer = (state: AppState, action: ActionType): AppState => {
         teams: state.teams.map(team => 
           team.id === action.payload.id ? action.payload : team
         ),
+      };
+    
+    case 'DELETE_TEAM':
+      return {
+        ...state,
+        teams: state.teams.filter(team => team.id !== action.payload),
       };
     
     case 'START_AUCTION':

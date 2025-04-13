@@ -6,6 +6,7 @@ import PlayerCard from "@/components/PlayerCard";
 import TeamBudgetCard from "@/components/TeamBudgetCard";
 import AuctionControls from "@/components/AuctionControls";
 import PlayerForm from "@/components/PlayerForm";
+import TeamForm from "@/components/TeamForm";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import { Button } from "@/components/ui/button";
 import { 
@@ -21,7 +22,8 @@ import {
   Gavel, 
   Edit, 
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  UserPlus
 } from "lucide-react";
 import {
   AlertDialog,
@@ -38,8 +40,10 @@ import {
 const Index = () => {
   const { state, dispatch } = useAppContext();
   const [playerFormOpen, setPlayerFormOpen] = useState(false);
+  const [teamFormOpen, setTeamFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
+  const [editingTeam, setEditingTeam] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("auction");
   
   const { auction, players, teams, userRole } = state;
@@ -54,6 +58,15 @@ const Index = () => {
     }
     setPlayerFormOpen(true);
   };
+
+  const handleOpenTeamForm = (teamId?: string) => {
+    if (teamId) {
+      setEditingTeam(teamId);
+    } else {
+      setEditingTeam(null);
+    }
+    setTeamFormOpen(true);
+  };
   
   const handleStartAuction = (playerId: string) => {
     const player = players.find(p => p.id === playerId);
@@ -65,9 +78,17 @@ const Index = () => {
   const handleDeletePlayer = (playerId: string) => {
     dispatch({ type: 'DELETE_PLAYER', payload: playerId });
   };
+
+  const handleDeleteTeam = (teamId: string) => {
+    dispatch({ type: 'DELETE_TEAM', payload: teamId });
+  };
   
   const playerToEdit = editingPlayer 
     ? players.find(p => p.id === editingPlayer) 
+    : undefined;
+
+  const teamToEdit = editingTeam
+    ? teams.find(t => t.id === editingTeam)
     : undefined;
   
   return (
@@ -340,21 +361,79 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="teams" className="space-y-4">
-              <h2 className="text-xl font-bold">Teams & Squads</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">Teams & Squads</h2>
+                {(isAuctioneer || isTeamOwner) && (
+                  <Button 
+                    onClick={() => handleOpenTeamForm()}
+                    className="bg-cricket-blue hover:bg-cricket-blue/90"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Team
+                  </Button>
+                )}
+              </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {teams.map(team => (
                   <div 
                     key={team.id} 
-                    className="cricket-card"
+                    className="cricket-card relative"
                     style={{ borderTop: `4px solid ${team.primaryColor}` }}
                   >
+                    {(isAuctioneer || isTeamOwner) && (
+                      <div className="absolute top-2 right-2 flex space-x-1">
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+                          onClick={() => handleOpenTeamForm(team.id)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Team</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete {team.name}? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-destructive text-destructive-foreground"
+                                onClick={() => handleDeleteTeam(team.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <h3 className="text-xl font-bold">{team.name}</h3>
                         <p className="text-sm text-muted-foreground">
                           Owner: {team.ownerName}
                         </p>
+                        {team.captainName && (
+                          <p className="text-sm text-cricket-blue">
+                            Captain: {team.captainName}
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
@@ -392,6 +471,25 @@ const Index = () => {
                     )}
                   </div>
                 ))}
+
+                {teams.length === 0 && (
+                  <div className="col-span-full cricket-card flex flex-col items-center justify-center p-8">
+                    <AlertTriangle className="h-8 w-8 text-cricket-orange mb-2" />
+                    <h3 className="text-xl font-bold mb-2">No Teams Available</h3>
+                    <p className="text-muted-foreground text-center mb-4">
+                      Add teams to the system to begin the auction process
+                    </p>
+                    {(isAuctioneer || isTeamOwner) && (
+                      <Button 
+                        onClick={() => handleOpenTeamForm()}
+                        className="bg-cricket-blue hover:bg-cricket-blue/90"
+                      >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Add Team
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -402,6 +500,12 @@ const Index = () => {
         open={playerFormOpen} 
         onOpenChange={setPlayerFormOpen} 
         player={playerToEdit}
+      />
+
+      <TeamForm
+        open={teamFormOpen}
+        onOpenChange={setTeamFormOpen}
+        team={teamToEdit}
       />
     </div>
   );
