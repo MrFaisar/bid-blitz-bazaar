@@ -42,6 +42,7 @@ const Index = () => {
   const [playerFormOpen, setPlayerFormOpen] = useState(false);
   const [teamFormOpen, setTeamFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   const [editingTeam, setEditingTeam] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("auction");
@@ -81,6 +82,7 @@ const Index = () => {
 
   const handleDeleteTeam = (teamId: string) => {
     dispatch({ type: 'DELETE_TEAM', payload: teamId });
+    setSelectedTeam(null); // Clear selection after deletion
   };
   
   const playerToEdit = editingPlayer 
@@ -376,16 +378,20 @@ const Index = () => {
                 {teams.map(team => (
                   <div 
                     key={team.id} 
-                    className="cricket-card relative"
+                    className="cricket-card relative cursor-pointer"
                     style={{ borderTop: `4px solid ${team.primaryColor}` }}
+                    onClick={() => setSelectedTeam(selectedTeam === team.id ? null : team.id)}
                   >
-                    {(isAuctioneer || isTeamOwner) && (
+                    {selectedTeam === team.id && (isAuctioneer || isTeamOwner) && (
                       <div className="absolute top-2 right-2 z-10 flex space-x-1">
                         <Button 
                           size="icon" 
                           variant="ghost" 
                           className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                          onClick={() => handleOpenTeamForm(team.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenTeamForm(team.id);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -396,11 +402,12 @@ const Index = () => {
                               size="icon" 
                               variant="ghost" 
                               className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Team</AlertDialogTitle>
                               <AlertDialogDescription>
