@@ -40,6 +40,7 @@ const Index = () => {
   const [playerFormOpen, setPlayerFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("auction");
   
   const { auction, players, teams, userRole } = state;
   const isAuctioneer = userRole.type === 'auctioneer';
@@ -87,7 +88,12 @@ const Index = () => {
       
       <main className="px-4 md:px-8 pb-20">
         <div className="container max-w-7xl">
-          <Tabs defaultValue="auction" className="space-y-4">
+          <Tabs 
+            defaultValue="auction" 
+            className="space-y-4"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
             <TabsList className="grid grid-cols-3">
               <TabsTrigger value="auction">
                 <Gavel className="h-4 w-4 mr-2" />
@@ -120,7 +126,7 @@ const Index = () => {
                       </p>
                       {isAuctioneer && (
                         <Button 
-                          onClick={() => dispatch({ type: 'TOGGLE_TAB', payload: 'players' })}
+                          onClick={() => setActiveTab("players")}
                           className="bg-cricket-blue hover:bg-cricket-blue/90"
                         >
                           Go to Players List
@@ -395,7 +401,7 @@ const Index = () => {
       <PlayerForm 
         open={playerFormOpen} 
         onOpenChange={setPlayerFormOpen} 
-        player={playerToEdit ? players.find(p => p.id === playerToEdit) : undefined}
+        player={playerToEdit}
       />
     </div>
   );
