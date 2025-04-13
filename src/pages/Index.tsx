@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -132,7 +131,6 @@ const Index = () => {
             
             <TabsContent value="auction" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                {/* Current auction player */}
                 <div className="md:col-span-8 space-y-4">
                   {auction.status === 'idle' ? (
                     <div className="cricket-card flex flex-col items-center justify-center p-8">
@@ -240,7 +238,6 @@ const Index = () => {
                   )}
                 </div>
                 
-                {/* Team budgets sidebar */}
                 <div className="md:col-span-4 space-y-4">
                   <h2 className="text-xl font-bold">Team Budgets</h2>
                   <div className="space-y-3">
@@ -423,17 +420,20 @@ const Index = () => {
                       </div>
                     )}
                     
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-xl font-bold">{team.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Owner: {team.ownerName}
-                        </p>
-                        {team.captainName && (
-                          <p className="text-sm text-cricket-blue">
-                            Captain: {team.captainName}
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground flex items-center">
+                            <span className="font-medium text-foreground mr-1">Owner:</span> {team.ownerName}
                           </p>
-                        )}
+                          {team.captainName && (
+                            <p className="text-sm flex items-center">
+                              <span className="font-medium mr-1">Captain:</span> 
+                              <span className="text-cricket-blue">{team.captainName}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
