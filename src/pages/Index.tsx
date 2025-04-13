@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -379,7 +380,7 @@ const Index = () => {
                     style={{ borderTop: `4px solid ${team.primaryColor}` }}
                   >
                     {(isAuctioneer || isTeamOwner) && (
-                      <div className="absolute top-2 right-2 flex space-x-1">
+                      <div className="absolute top-2 right-2 z-10 flex space-x-1">
                         <Button 
                           size="icon" 
                           variant="ghost" 
@@ -420,7 +421,7 @@ const Index = () => {
                       </div>
                     )}
                     
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-4 pt-6">
                       <div>
                         <h3 className="text-xl font-bold">{team.name}</h3>
                         <div className="space-y-1">
